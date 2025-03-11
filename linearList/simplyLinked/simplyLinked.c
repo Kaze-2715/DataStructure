@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "linearList.h"
+#include "simplyLinked.h"
 
 item getItem()
 {

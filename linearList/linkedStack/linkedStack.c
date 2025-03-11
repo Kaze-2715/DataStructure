@@ -1,10 +1,10 @@
-#include "stack.h"
+#include "linkedStack.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void initStack(stack *Stack)
+void initStack(stack *Stack, int size)
 {
-    Stack->MAXCOUNT = 10;
+    Stack->MAXCOUNT = size;
     Stack->top = NULL;
     Stack->count = 0;
     Stack->clear = clear;

@@ -24,7 +24,7 @@ struct stack
     int (*get)(item *buffer, stack *Stack);
 };
 
-void initStack(stack *Stack);
+void initStack(stack *Stack, int size);
 void clear(stack *Stack);
 int isEmpty(stack *Stack);
 int isFull(stack *Stack);
