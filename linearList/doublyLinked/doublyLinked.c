@@ -1,4 +1,4 @@
-#include "circuitLinked.h"
+#include "doublyLinked.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,76 +30,53 @@ void destroy(list *List)
 {
     if (List->head == NULL)
     {
-        goto end;
+        return;
     }
-    if (List->head->next = List->head)
+    node *cur = List->head;
+    while (cur != NULL)
     {
-        free(List->head);
-        List->head = NULL;
-        goto end;
+        node *tmp = cur->next;
+        free(cur);
+        cur = tmp;
     }
-    else
-    {
-        node *cur = List->head;
-        node *tmp = NULL;
-        do
-        {
-            tmp = cur->next;
-            free(cur);
-            cur = tmp;
-
-        } while (cur != List->head);
-        
-    }
-end:
     List->head = NULL;
     List->size = 0;
-    List->MAXSIZE = 0;
     return;
 }
 
 void headInsert(item *data, list *List)
 {
-    if (List->head == NULL)
-    {
-        puts("List is empty");
-        return;
-    }
-    
-    if (List->size = List->MAXSIZE)
-    {
-        puts("List is full");
-        return;
-    }
-    
     node *new = malloc(sizeof(node));
     new->data = *data;
+    new->prev = NULL;
     new->next = List->head;
-    node *tail = List->head;
-    while (tail->next != List->head)
-    {
-        tail = tail->next;
-    }
-    tail->next = new;
     List->head = new;
+    List->size++;
+    return;
 }
 
 void tailInsert(item *data, list *List)
 {
-    if (List->size = List->MAXSIZE)
+    if (List->head == NULL)
     {
-        puts("List is full");
+        node *new = malloc(sizeof(node));
+        new->data = *data;
+        new->prev = NULL;
+        List->head = new;
         return;
+    }
+
+    node *cur = List->head;
+    while (cur->next != NULL)
+    {
+        cur = cur->next;
     }
     node *new = malloc(sizeof(node));
     new->data = *data;
-    new->next = List->head;
-    node *tail = List->head;
-    while (tail->next != List->head)
-    {
-        tail = tail->next;
-    }
-    tail->next = new;
+    new->next = NULL;
+    new->prev = cur;
+    cur->next = new;
+    List->size++;
     return;
 }
 
@@ -110,64 +87,38 @@ int getIndex(item *data, list *List)
         puts("List is empty");
         return;
     }
-    
-    node *cur = List->head;
-    if (cur->next == List->head)
+    int index = 0;
+    for (node *cur = List->head; cur != NULL; cur = cur->next)
     {
+        index++;
         if (cur->data == *data)
         {
-            return 1;
+            return index;
         }
-        else
-        {
-            puts("No such data");
-            return -1;
-        }
-    }
-    else
-    {
-        int index = 1;
-        do
-        {
-            if (cur->data == *data)
-            {
-                return index;
-            }
-            else
-            {
-                index++;
-                cur = cur->next;
-            }
-            
-        } while (cur->next != List->head);
-        
     }
     puts("No such data");
-    return -1;
+    return 0;
 }
 
 int getValue(int index, item *data, list *List)
 {
+    if (List->head == NULL)
+    {
+        puts("List is empty");
+        return;
+    }
     if (index < 1 || index > List->size)
     {
         puts("Invalid index");
-        return 0;
+        return;
     }
-
     node *cur = List->head;
-    if (cur->next == List->head)
+    for (int i = 1; i < index; i++)
     {
-        *data = cur->data;
-    }    
-    else
-    {
-        for (int i = 0; i < index; i++)
-        {
-            cur = cur->next;
-        }
-        *data = cur->data;
+        cur = cur->next;
     }
-    return 1;
+    *data = cur->data;
+    return;
 }
 
 void indexInsert(int index, item *data, list *List)
@@ -177,28 +128,30 @@ void indexInsert(int index, item *data, list *List)
         puts("List is empty");
         return;
     }
-    
     if (index < 1 || index > List->size + 1)
     {
         puts("Invalid index");
         return;
     }
-    node *cur = List->head;
     if (index == 1)
     {
         headInsert(data, List);
     }
     else
     {
-        for (int i = 0; i < index - 1; i++)
+        int count = 1;
+        node *cur = List->head;
+        while (count < index - 1)
         {
             cur = cur->next;
         }
         node *new = malloc(sizeof(node));
         new->data = *data;
         new->next = cur->next;
-        cur->next = new;
+        cur->next->prev = new;
+        new->prev = cur;
     }
+    List->size++;
     return;
 }
 
@@ -212,24 +165,27 @@ void indexRemove(int index, item *data, list *List)
     if (index < 1 || index > List->size)
     {
         puts("Invalid index");
-        return;
     }
-    if (List->size == 1)
+    if (index == 1)
     {
-        *data = List->head->data;
-        free(List->head);
-        List->head = NULL;
+        node *toDelete = List->head;
+        List->head = toDelete->next;
+        List->head->prev = NULL;
+        free(toDelete);
+        List->size--;
+        return;
     }
     else
     {
         node *cur = List->head;
-        for (int i = 0; i < index - 1; i++)
+        for (int i = 1; i < index - 1; i++)
         {
             cur = cur->next;
         }
         node *toDelete = cur->next;
+        toDelete->next->prev = cur;
         cur->next = toDelete->next;
-        free(toDelete);
+        List->size--;
     }
     return;
 }
@@ -241,13 +197,12 @@ void valueRemove(item *data, list *List)
         puts("List is empty");
         return;
     }
-    if (List->size == 1)
+    if (List->head->next == NULL)
     {
         if (List->head->data == *data)
         {
             free(List->head);
             List->head = NULL;
-            List->size--;
         }
         else
         {
@@ -257,19 +212,18 @@ void valueRemove(item *data, list *List)
     }
     else
     {
-        node *cur = NULL;
-        for (cur = List->head; cur->next != List->head; cur = cur->next)
+        for (node *cur = List->head; cur != NULL; cur = cur->next)
         {
-            if (cur->next->data == *data)
+            if (cur->data == *data)
             {
-                node *toDelete = cur->next;
-                cur->next = toDelete->next;
-                free(toDelete);
+                node *prev = cur->prev;
+                node *next = cur->next;
+                prev->next = next;
+                next->prev = prev;
                 return;
             }
         }
         puts("No such data");
-
+        return;
     }
-    return;
 }
