@@ -6,6 +6,19 @@ void preOrder(Node *node);
 void inOrder(Node *node);
 void postOrder(Node *node);
 
+void inOrder(Node *node)
+{
+    //Recursive Implementation
+    if (node == NULL)
+    {
+        return;
+    }
+    inOrder(node->leftChild);
+    printf("%d ", node->data);
+    inOrder(node->rightChild);
+
+    //Non-recursive Implementation
+}
 // TODO: Implement destroy function
 void destroy(Tree *tree)
 {
