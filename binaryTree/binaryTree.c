@@ -3,12 +3,10 @@
 #include "binaryTree.h"
 
 void preOrder(Node *node);
-void inOrder(Node *node);
-void postOrder(Node *node);
 
-void inOrder(Node *node)
+static void inOrder(Node *node)
 {
-    //Recursive Implementation
+    // Recursive Implementation
     if (node == NULL)
     {
         return;
@@ -16,27 +14,95 @@ void inOrder(Node *node)
     inOrder(node->leftChild);
     printf("%d ", node->data);
     inOrder(node->rightChild);
-
-    //Non-recursive Implementation
+    return;
+    // Non-recursive Implementation
 }
-// TODO: Implement destroy function
+
+void postOrder(Node *node);
+
+//? 释放子树的时候应该后序遍历吧？
+static void destroySubTree(Node *node)
+{
+    if (node == NULL)
+    {
+        return;
+    }
+    destroySubTree(node->leftChild);
+    destroySubTree(node->rightChild);
+    free(node);
+    return;
+}
+
+static Node *searchvalue(Node *root, item toSearch)
+{
+    if (root == NULL)
+    {
+        return NULL;
+    }
+    if (root->data == toSearch)
+    {
+        return root;
+    }
+    Node *Result = searchValue(root->leftChild, toSearch);
+    if (Result == NULL)
+    {
+        Result = searchValue(root->rightChild, toSearch);
+    }
+    return Result;
+}
+
+static Node *searchParent(Node *root, Node *toSearch)
+{
+    if (root == NULL)
+    {
+        return NULL;
+    }
+    if (root->leftChild == toSearch || root->rightChild == toSearch)
+    {
+        return root;
+    }
+    Node *result = searchParent(root->leftChild, toSearch);
+    if (result == NULL)
+    {
+        result = searchParent(root->rightChild, toSearch);
+    }
+    return result;
+}
+
 void destroy(Tree *tree)
 {
+    if (tree == NULL)
+    {
+        return;
+    }
+    if (tree->root == NULL)
+    {
+        return;
+    }
+    destroySubTree(tree->root);
+    tree->root == NULL;
+    return;
 }
 
-// TODO: Implement parent function
 Node *parent(Tree *tree, Node *node)
 {
-
+    if (tree == NULL)
+    {
+        return NULL;
+    }
+    if (tree->root == NULL)
+    {
+        return NULL;
+    }
+    
+    return searchParent(tree->root, node);
 }
 
-// TODO: Implement getLeftChild function
 Node *getLeftChild(Node *node)
 {
     return node->leftChild;
 }
 
-// TODO: Implement getRightChild function
 Node *getRightChild(Node *node)
 {
     return node->rightChild;
@@ -47,7 +113,6 @@ void clear(Tree *tree)
 {
 }
 
-// TODO: Implement insertLeftChild function
 Node *insertLeftChild(Node *node, item data)
 {
     if (node == NULL)
@@ -63,7 +128,6 @@ Node *insertLeftChild(Node *node, item data)
     return new;
 }
 
-// TODO: Implement insertRightChild function
 Node *insertRightChild(Node *node, item data)
 {
     if (node == NULL)
@@ -79,15 +143,23 @@ Node *insertRightChild(Node *node, item data)
     return new;
 }
 
+Node *searchValue(Tree *tree, item value)
+{
+    if (tree == NULL)
+    {
+        return NULL;
+    }
+    if (tree->root == NULL)
+    {
+        return NULL;
+    }
+    return searchvalue(tree->root, value);
+}
+
 // TODO: Implement Traverse function
 void Traverse(Tree *tree)
 {
-}
 
-// TODO: Implement searchNode function
-Node *searchNode(Tree *tree, Node *node)
-{
-    return NULL;
 }
 
 // TODO: Implement getDepth function
@@ -102,7 +174,6 @@ int getNodeCount(Tree *tree)
     return 0;
 }
 
-// TODO: Implement isEmpty function
 int isEmpty(Tree *tree)
 {
     return (tree->root == NULL) ? 1 : 0;
@@ -168,7 +239,7 @@ void initTree(Tree *tree)
     tree->insertLeftChild = insertLeftChild;
     tree->insertRightChild = insertRightChild;
     tree->Traverse = Traverse;
-    tree->searchNode = searchNode;
+    tree->searchValue = searchValue;
     tree->getDepth = getDepth;
     tree->getNodeCount = getNodeCount;
     tree->isEmpty = isEmpty;

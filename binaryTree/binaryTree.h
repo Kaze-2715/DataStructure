@@ -21,7 +21,7 @@ struct binaryTree
     // 节点操作
     Node *(*insertLeftChild)(Node *node, item data);
     Node *(*insertRightChild)(Node *node, item data);
-    Node *(*searchNode)(Tree *tree, Node *node);
+    Node *(*searchValue)(Tree *tree, item value);
     Node *(*parent)(Tree *tree, Node *node);
     Node *(*getLeftChild)(Node *node);
     Node *(*getRightChild)(Node *node);
@@ -55,7 +55,7 @@ void clear(Tree *tree);
 // 节点操作
 Node *insertLeftChild(Node *node, item data);
 Node *insertRightChild(Node *node, item data);
-Node *searchNode(Tree *tree, Node *node);
+Node *searchValue(Tree *tree, item value);
 Node *parent(Tree *tree, Node *node);
 Node *getLeftChild(Node *node);
 Node *getRightChild(Node *node);
