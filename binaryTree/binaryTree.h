@@ -5,6 +5,13 @@ typedef struct node
     struct node *right;
 } node, *tree;
 
+typedef struct threadNode
+{
+    int isLeftThread, isRightThread;
+    struct threadNode *left, *right;
+    int data;
+} tNode, *tTree;
+
 /* 基础操作 Basic Operations */
 // 创建与销毁
 tree initTree();             // 初始化树
@@ -37,10 +44,8 @@ int isBalanced(tree t);     // 判断是否为平衡二叉树
 void mirror(tree t);         // 镜像转换
 
 // 复杂查询与变换
-node *lowestCommonAncestor(tree t, node *p, node *q);     // 最近公共祖先
+node *LCA(tree t, node *p, node *q);     // 最近公共祖先
 int maxWidth(tree t);                                     // 获取最大宽度
-void serialize(tree t, char *str);                       // 序列化二叉树
-node *deserialize(char *str);                             // 反序列化二叉树
 
 // 迭代实现（非递归）
 void preOrderIter(tree t);      // 非递归前序遍历

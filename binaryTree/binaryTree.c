@@ -344,6 +344,162 @@ int isComplete(tree t)
     return iscomplete;
 }
 
+//* 平衡二叉树自下向上递归
+int isBalanced(tree t)
+{
+    if (!t)
+    {
+        return 1;
+    }
+    if (!t->left && !t->right)
+    {
+        return 1;
+    }
+
+    int leftHeight = isBalanced(t->left);
+    int rightHeight = isBalanced(t->right);
+
+    if (leftHeight == -1 || rightHeight == -1 || abs(leftHeight - rightHeight) > 1)
+    {
+        return -1;
+    }
+
+    return (leftHeight > rightHeight) ? (leftHeight + 1) : (rightHeight + 1);
+}
+
+//* 镜像变换
+void mirror(tree t)
+{
+    if (!t)
+    {
+        return;
+    }
+
+    node *tmp = t->right;
+    t->right = t->left;
+    t->left = tmp;
+
+    mirror(t->left);
+    mirror(t->right);
+
+    return;
+}
+
+//* 计算的是实际宽度，不含空结点
+int maxWidth(tree t)
+{
+    if (!t)
+    {
+        return 0;
+    }
+    queue nodes = initQueue();
+    enqueue(nodes, t);
+    int maxWidth = 1;
+    int levelCount = 1;
+    while (!empty(nodes))
+    {
+        int nextLevelCount = 0;
+        for (int i = 0; i < levelCount; i++)
+        {
+            node *cur = dequeue(nodes);
+            if (cur->left)
+            {
+                enqueue(nodes, cur->left);
+                nextLevelCount++;
+            }
+            if (cur->right)
+            {
+                enqueue(nodes, cur->right);
+                nextLevelCount++;
+            }
+        }
+        levelCount = nextLevelCount;
+        maxWidth = (maxWidth > levelCount) ? maxWidth : levelCount;
+    }
+    destroyQueue(nodes);
+    return maxWidth;
+}
+
+node *LCA(tree t, node *a, node *b)
+{
+    if (t == NULL || t == a || t == b)
+    {
+        return t;
+    }
+
+    node *leftResult = LCA(t->left, a, b);
+    node *rightResult = LCA(t->right, a, b);
+
+    //* 左右两边都查找到结果
+    if (leftResult && rightResult)
+    {
+        return t;
+    }
+
+    return leftResult ? leftResult : rightResult;
+}
+
+void inThread(tTree t, tNode **pre)
+{
+    if (!t)
+    {
+        return;
+    }
+    inThread(t->left, pre);
+    if (!t->left)
+    {
+        t->isLeftThread = 1;
+        t->left = *pre;
+    }
+    if ((*pre) && !(*pre)->right)
+    {
+        (*pre)->right = t;
+        (*pre)->isRightThread = 1;
+    }
+
+    *pre = t;
+    inThread(t->right, pre);
+    return;
+}
+
+void inOrderSerialize(tTree t)
+{
+    tNode *pre = NULL;
+    inThread(t, &pre);
+}
+
+void preThread(tTree t, tNode **pre)
+{
+    if (!t)
+    {
+        return;
+    }
+
+    if (!t->left)
+    {
+        t->left = *pre;
+        t->isLeftThread = 1;
+    }
+    if ((*pre) && !(*pre)->right)
+    {
+        (*pre)->right = t;
+        (*pre)->isRightThread = 1;
+    }
+
+    *pre = t;
+
+    //! 注意前序遍历中，处理完根结点再处理左右子树的时候，要先检查根结点的左右指针是否为线索，然后再递归左右子树，否则会出现无限递归的情况。
+    if (!t->isLeftThread)
+    {
+        preThread(t->left, pre);
+    }
+    if (!t->isRightThread)
+    {
+        preThread(t->right, pre);
+    }
+    return;
+}
+
 int main()
 {
     // 创建如下结构的二叉树：
@@ -383,4 +539,9 @@ int main()
     // 清理内存
     destroyTree(root);
     return 0;
+}
+
+void preOrderIter(tree t)
+{
+
 }
