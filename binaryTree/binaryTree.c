@@ -17,6 +17,59 @@ typedef struct queue
     queueNode *rear;
 } *queue;
 
+typedef struct sNode 
+{
+    node *ptr;
+    struct sNode *next;
+} sNode, *stack;
+
+int isEmptyStack(stack s)
+{
+    return s->next ? 1 : 0;
+}
+
+stack initStack()
+{
+    stack new = (stack)malloc(sizeof(sNode));
+    new->ptr = NULL;
+    new->next = NULL;
+    return new;
+}
+
+node *pop(stack s)
+{
+    sNode *top = s->next;
+    if (top == NULL)
+    {
+        return NULL;
+    }
+    node *data = top->ptr;
+    s->next = top->next;
+    free(top);
+    return data;
+}
+
+node *push(stack s, node *data)
+{
+    sNode *new = (sNode *)malloc(sizeof(sNode));
+    new->ptr = data;
+    new->next = s->next;
+    s->next = new;
+    return data;
+}
+
+void destroyStack(stack s)
+{
+    sNode *cur = s->next;
+    while (s->next)
+    {
+        sNode *next = cur->next;
+        free(cur);
+        cur = next;
+    }
+    return;
+}
+
 queue initQueue()
 {
     queue new = malloc(sizeof(struct queue));
@@ -500,6 +553,130 @@ void preThread(tTree t, tNode **pre)
     return;
 }
 
+void preOrderSerialize(tTree t)
+{
+    tNode *pre = NULL;
+    preThread(t, &pre);
+    return;
+}
+
+void postThread(tTree t, tNode **pre)
+{
+    if (!t)
+    {
+        return;
+    }
+    postThread(t->left, pre);
+    postThread(t->right, pre);
+
+    if (!t->left)
+    {
+        t->isLeftThread = 1;
+        t->left = *pre;
+    }
+    if ((*pre) && !(*pre)->right)
+    {
+        (*pre)->isRightThread = 1;
+        (*pre)->right = t;
+    }
+    *pre = t;
+    return;
+}
+
+void postOrderSerialize(tree t)
+{
+    tNode *pre = NULL;
+    postThread(t, &pre);
+    return;
+}
+
+void preOrderIter(tree t)
+{
+    if (!t)
+    {
+        return;
+    }
+    stack nodes = initStack();
+    push(nodes, t);
+    
+    //类似层序遍历，循环条件是栈非空
+    while (!isEmptyStack(nodes))
+    {
+        node *cur = pop(nodes);
+        visit(cur);
+
+        //! 这里要注意压栈顺序：我要先左后右访问，因此要先右后左压栈
+        if (cur->right)
+        {
+            push(nodes, cur->right);
+        }
+        if (cur->left)
+        {
+            push(nodes, cur->left);
+        }
+        
+    }
+    
+}
+
+void inOrderIter(tree t)
+{
+    if (!t)
+    {
+        return;
+    }
+    stack nodes = initStack();
+    node *cur = t;
+
+    while (!isEmptyStack(nodes) || cur)
+    {
+        while (cur) //! 这里是cur
+        {
+            push(nodes, cur->left);
+            cur = cur->left;
+        }
+
+        cur = pop(nodes);
+        visit(cur);
+
+        //?
+        cur = cur->right;
+    }
+}
+
+void postOrderIter(tree t)
+{
+    if (!t)
+    {
+        return;
+    }
+    stack main = initStack();
+    stack output = initStack();
+    push(main, t);
+
+    while (!isEmptyStack(main))
+    {
+        node *cur = pop(main);
+        push(output, cur);
+
+        if (cur->left)
+        {
+            push(main, cur->left);
+        }
+        if (cur->right)
+        {
+            push(main, cur->right);
+        }
+        
+    }
+    
+    while(!isEmptyStack(output))
+    {
+        visit(pop(output));
+    }
+    return;
+}
+
 int main()
 {
     // 创建如下结构的二叉树：
@@ -539,9 +716,4 @@ int main()
     // 清理内存
     destroyTree(root);
     return 0;
-}
-
-void preOrderIter(tree t)
-{
-
 }
